@@ -1,8 +1,5 @@
-// controllers/adminController.js
-//chang
 const db = require('../config/db');
 
-// View Users
 exports.viewUsers = async (req, res, next) => {
     try {
         const [users] = await db.query("SELECT * FROM users");
@@ -12,7 +9,7 @@ exports.viewUsers = async (req, res, next) => {
     }
 };
 
-// View Owners
+
 exports.viewOwners = async (req, res, next) => {
     try {
         const [owners] = await db.query("SELECT * FROM owners JOIN users ON owners.user_id = users.user_id");
@@ -22,7 +19,7 @@ exports.viewOwners = async (req, res, next) => {
     }
 };
 
-// View Deliveries
+
 exports.viewDeliveries = async (req, res, next) => {
     try {
         const [deliveries] = await db.query("SELECT * FROM delivery JOIN users ON delivery.user_id = users.user_id");
@@ -32,7 +29,7 @@ exports.viewDeliveries = async (req, res, next) => {
     }
 };
 
-// View Items
+
 exports.viewItems = async (req, res, next) => {
     try {
         const [items] = await db.query("SELECT * FROM items");
@@ -42,7 +39,7 @@ exports.viewItems = async (req, res, next) => {
     }
 };
 
-// View Rentals
+
 exports.viewRentals = async (req, res, next) => {
     try {
         const [rentals] = await db.query("SELECT * FROM rentals");
@@ -52,7 +49,7 @@ exports.viewRentals = async (req, res, next) => {
     }
 };
 
-// View Reviews
+
 exports.viewReviews = async (req, res, next) => {
     try {
         const [reviews] = await db.query("SELECT * FROM reviews");
@@ -62,10 +59,26 @@ exports.viewReviews = async (req, res, next) => {
     }
 };
 
-// Delete User
+
 exports.deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
+
+        
+        const [userResult] = await db.query("SELECT user_type FROM users WHERE user_id = ?", [id]);
+        const user = userResult[0];
+
+        if (!user) {
+            
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (user.user_type === 'Admin') {
+            
+            return res.status(403).json({ message: 'Action forbidden: Admin users cannot be deleted.' });
+        }
+
+        
         await db.query("DELETE FROM users WHERE user_id = ?", [id]);
         res.json({ message: 'User deleted successfully.' });
     } catch (error) {
@@ -73,7 +86,9 @@ exports.deleteUser = async (req, res, next) => {
     }
 };
 
-// Delete Owner
+
+
+
 exports.deleteOwner = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -84,7 +99,7 @@ exports.deleteOwner = async (req, res, next) => {
     }
 };
 
-// Delete Delivery
+
 exports.deleteDelivery = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -95,7 +110,7 @@ exports.deleteDelivery = async (req, res, next) => {
     }
 };
 
-// Delete Item
+
 exports.deleteItem = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -106,7 +121,7 @@ exports.deleteItem = async (req, res, next) => {
     }
 };
 
-// View Profit
+
 exports.viewProfit = async (req, res, next) => {
     try {
         const [profitData] = await db.query("SELECT SUM(total_price) * 0.1 AS profit FROM rentals");
